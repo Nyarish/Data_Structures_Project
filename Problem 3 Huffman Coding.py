@@ -1,72 +1,123 @@
 
 import sys
-import heapq
+import time
 
-# Based on the Huffman dicitionary, generate unique binary code for each character of our string message
-def encoded_text(huffman_dict, data):
-    huff_code = ''
-    
-    for _ in data:
-        huff_code += str(huffman_dict[_])
-    return huff_code
+class Node(object):
+    def __init__(self, count, ch = None):
+        self.child_0 = None
+        self.child_1 = None
+        self.count = count 
+        self.ch = ch
+
+    def __str__(self):
+        return "(char: {}, count: {})".format(self.ch, self.count)
 
 
+# ENCODING
 def huffman_encoding(data):
-    
-    # Create dictionary to store charcters/symbols and frequency
-    huff = {}
-    
-    global huffman_dict
-    huffman_dict = {}
-    
-    # Determine the frequency of each character in the message
-    for char in data:
-        huff[char] = huff.get(char, 0) + 1
-    
-    # Build a huffman tree heap
-    heap = [[frequency,[character, '']] for character, frequency in huff.items()]  
-    heapq.heapify(heap)
-    
-    if len(heap) == 1:
-        huffman_dict[heap[0][1][1]] = str(heap[0][0])
-        huffcode = encoded_text(huffman_dict, data)
-        return huffcode, heap
-    
-    # Build and sort a list of nodes in the order lowest to highest frequencies. 
-    # where a node that has lower frequency should have a higher priority to be popped-out.
-    
-    while len(heap) > 1:
-        left_child = heapq.heappop(heap)
-        right_child = heapq.heappop(heap)
-    
-        # For each node, in the Huffman tree, assign a bit 0 for left child and a 1 for right child
-        for value in left_child[1:]:
-            value[1] = '0'+ value[1]
-        for value in right_child[1:]:
-            value[1] = '1' + value[1]
-        
-        heapq.heappush(heap, [left_child[0] + right_child[0]] + left_child[1:] +right_child[1:])
-    
-    # Make a dictionary of a char and its binary code
-    huffman_list = left_child[1:] + right_child[1:]
-    huffman_dict = {_[0]: str(_[1]) for _ in huffman_list}
-    
-    huffcode = encoded_text(huffman_dict, data)
-    return huffcode, heap
 
-def huffman_decoding(data,tree):
-    decoded_text = ''
-    current_code = ''
+    # count frequencies
+    frequency = {}
+    for char in data:
+        frequency[char] = frequency.get(char,0) +1
     
-    for bit in data:
-        current_code += bit
-        if current_code in huffman_dict.values():
-            for key in huffman_dict:
-                if current_code == huffman_dict[key]:
-                    decoded_text += key
-                    current_code = ""
-                            
-    return decoded_text
+    if len(frequency)<2:
+        if data == "":
+            return "0", Node(1,"")
+        else:
+            return encode(data, generate_huffman_code(Node(1,data[0]))), Node(1,data[0])
+
+    # make nodes with counts and associated chars
+    nodes = {}
+    for char in frequency:
+        nodes[char] = Node(frequency[char], char)
+
+    # generate Tree
+    priority = 1
+    node_0 = None
+    node_1 = None
+    parent_node = None
+    while len(nodes)>1:
+        change_priority = True
+        min_priority = None
+        for char in nodes:            
+            if nodes[char].count == priority:
+                if not node_0:
+                    node_0 = nodes[char]
+                elif not node_1: 
+                    node_1 = nodes[char]
+            elif not min_priority or nodes[char].count< min_priority:
+                min_priority = nodes[char].count
+            
+            if node_0 and node_1:
+                parent_node = Node(node_0.count + node_1.count,
+                                   node_0.ch + node_1.ch)
+                parent_node.child_0 = node_0
+                parent_node.child_1 = node_1
+                nodes[parent_node.ch] = parent_node
+                nodes.pop(node_0.ch)
+                nodes.pop(node_1.ch)
+                node_0 = None
+                node_1 = None
+                change_priority = False
+                break
+
+        if change_priority:
+            priority = min_priority
+    tree = parent_node
+
+    # generate encoding
+    encoding = generate_huffman_code(tree)
+
+    encoded_data = encode(data, encoding)
+
+    return encoded_data, tree
+
+def generate_huffman_code(node , code = ""):
+    encoding = {}
+    if node:
+        if not (node.child_0 or node.child_1):
+            if code == "": # case of only one letter
+                encoding.update({node.ch: "0"})
+            else:
+                encoding.update({node.ch: code})
+        encoding.update(generate_huffman_code(node.child_0, code + "0"))
+        encoding.update(generate_huffman_code(node.child_1, code + "1"))
+    return encoding
+
+def encode(data , encoding):
+    encoded_data = data
+    for char in encoding:
+        encoded_data = encoded_data.replace(char, encoding[char])
+    return encoded_data
+    
+
+# DECODING
+def huffman_decoding(data, tree):
+    
+    encoding = generate_huffman_reverse_code(tree)
+    decoded_message = ""
+    code = ""
+    for c in data:
+        code += c
+        if code in encoding:
+            decoded_message += encoding[code]
+            code = ""
+    
+    return decoded_message
+
+def generate_huffman_reverse_code(node , code = ""):
+    encoding = {}
+    if node:
+        if not (node.child_0 or node.child_1):
+            if code == "": # case of only one letter
+                encoding.update({"0": node.ch})
+            else:
+                encoding.update({code: node.ch})
+        encoding.update(generate_huffman_reverse_code(node.child_0, code + "0"))
+        encoding.update(generate_huffman_reverse_code(node.child_1, code + "1"))
+    return encoding
+
 
 if __name__ == "__main__":
     codes = {}
@@ -93,7 +144,7 @@ if __name__ == "__main__":
     # Test case 2
     print("Test case 2")
 
-    a_great_sentence = "Udacity is best MOOCK out there..."
+    a_great_sentence = ''
 
     print ("The size of the data is: {}\n".format(sys.getsizeof(a_great_sentence)))
     print ("The content of the data is: {}\n".format(a_great_sentence))
@@ -112,7 +163,7 @@ if __name__ == "__main__":
     # Test case 3
     print("Test case 3")
 
-    a_great_sentence = "Data Structure And Algorithm is a touch cooky but totaly worth it"
+    a_great_sentence = ' aaaaa'
 
     print ("The size of the data is: {}\n".format(sys.getsizeof(a_great_sentence)))
     print ("The content of the data is: {}\n".format(a_great_sentence))
@@ -137,7 +188,7 @@ The content of the data is: The bird is the word
 
 The size of the encoded data is: 36
 
-The content of the encoded data is: 1110000100011011101010100111111001001111101010001000110101101101001111
+The content of the encoded data is: 0110111011111100111000001010110000100011010011110111111010101011001010
 
 The size of the decoded data is: 69
 
@@ -145,31 +196,32 @@ The content of the encoded data is: The bird is the word
 
 _________________________________________
 Test case 2
-The size of the data is: 83
+The size of the data is: 49
 
-The content of the data is: Udacity is best MOOCK out there...
+The content of the data is: 
 
-The size of the encoded data is: 44
+The size of the encoded data is: 24
 
-The content of the encoded data is: 0010101011010000101001111010000110011110011100100111111001101110001000011001100010000111100110110001101110101011001111100001111111011101110
+The content of the encoded data is: 0
 
-The size of the decoded data is: 83
+The size of the decoded data is: 49
 
-The content of the encoded data is: Udacity is best MOOCK out there...
+The content of the encoded data is: 
 
 _________________________________________
 Test case 3
-The size of the data is: 114
+The size of the data is: 55
 
-The content of the data is: Data Structure And Algorithm is a touch cooky but totaly worth it
+The content of the data is:  aaaaa
 
-The size of the encoded data is: 60
+The size of the encoded data is: 28
 
-The content of the encoded data is: 01010001101100110111010101110100110101011111010101001011100111010011000100101111110100110000011101001100100011100000011111111000110001111101101111100011010101110000111101110010010111101011011101011010101101111100011100110100001011011101000001100111000001110001110
+The content of the encoded data is: 011111
 
-The size of the decoded data is: 114
+The size of the decoded data is: 55
 
-The content of the encoded data is: Data Structure And Algorithm is a touch cooky but totaly worth it
+The content of the encoded data is:  aaaaa
+
 
 """
 

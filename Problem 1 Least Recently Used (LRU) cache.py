@@ -61,8 +61,13 @@ class LRU_Cache(object):
     def set(self, key, value):
         # Set the value if the key is not present in the cache. 
         # If the cache is at capacity remove the oldest item. 
+        if self.capacity == 0:
+            print("The cache has Zero capacity")
+            return None
+        
         key = key -1
         if key >= self.capacity:
+            
             key = key % self.capacity 
         if self.cache_array[key] is None:
             self.cache_array[key] = value
@@ -84,9 +89,10 @@ class LRU_Cache(object):
                 print("That Key is filled")
                 
         print("Current Fill level is now at {}".format(self.num_entries))
-
+print("__________________________________________________________________")
 # Test case 1
-print("Test case 1")
+print("Test case 1 LRU_Cache(5)")
+print("__________________________________________________________________")
 
 our_cache = LRU_Cache(5)
 
@@ -107,8 +113,10 @@ our_cache.set(6, 6)
 print()
 print("This value {} is in the cache".format(our_cache.get(3)))      # returns -1 because the cache reached it's capacity and 3 was the least recently used entry
 
+print("__________________________________________________________________")
 # Test case 2
-print("Test case 2")
+print("Test case 2 LRU_Cache(3)")
+print("__________________________________________________________________")
 
 our_cache = LRU_Cache(3)
 
@@ -127,9 +135,10 @@ our_cache.set(6, 6)
 
 print()
 print("This value {} is in the cache".format(our_cache.get(3)))      # returns -1 because the cache reached it's capacity and 3 was the least recently used entry
-
+print("__________________________________________________________________")
 # Test case 3
-print("Test case 3")
+print("Test case 3 LRU_Cache(1)")
+print("__________________________________________________________________")
 
 our_cache = LRU_Cache(1)
 
@@ -148,12 +157,34 @@ our_cache.set(6, 6)
 print()
 print("This value {} is in the cache".format(our_cache.get(3)))      # returns -1 because the cache reached it's capacity and 3 was the least recently used entry
 
+print("__________________________________________________________________")
+# Test case 4
+print("Test case 4 with LRU_Cache(0)")
+print("__________________________________________________________________")
 
-# In[ ]:
+our_cache = LRU_Cache(0)
+
+our_cache.set(3, 3);
+our_cache.set(4, 4);
+
+print()
+print("This value {} is in the cache".format(our_cache.get(3)))      # returns 1
+print("This value {} is in the cache".format(our_cache.get(4)))      # returns 2
+# print("This value {} is in the cache".format(our_cache.get(9)))      # returns -1 because 9 is not present in the cache
+
+print()
+our_cache.set(5, 5) 
+our_cache.set(6, 6)
+
+print()
+print("This value {} is in the cache".format(our_cache.get(3)))      # returns -1 because the cache reached it's capacity and 3 was the least recently used entry
+
 
 
 """OUTPUT
-Test case 1
+__________________________________________________________________
+Test case 1 LRU_Cache(5)
+__________________________________________________________________
 Current Fill level is now at 1
 Current Fill level is now at 2
 Current Fill level is now at 3
@@ -167,9 +198,9 @@ Current Fill level is now at 5
 Current Fill level is now at 4
 
 This value -1 is in the cache
-
-
-Test case 2
+__________________________________________________________________
+Test case 2 LRU_Cache(3)
+__________________________________________________________________
 Current Fill level is now at 1
 Current Fill level is now at 2
 That Key is filled
@@ -183,9 +214,9 @@ Current Fill level is now at 3
 Current Fill level is now at 2
 
 This value -1 is in the cache
-
-
-Test case 3
+__________________________________________________________________
+Test case 3 LRU_Cache(1)
+__________________________________________________________________
 Current Fill level is now at 1
 Current Fill level is now at 0
 
@@ -197,12 +228,17 @@ Current Fill level is now at 1
 Current Fill level is now at 0
 
 This value -1 is in the cache
+__________________________________________________________________
+Test case 4 with LRU_Cache(0)
+__________________________________________________________________
+The cache has Zero capacity
+The cache has Zero capacity
 
+This value -1 is in the cache
+This value -1 is in the cache
+
+The cache has Zero capacity
+The cache has Zero capacity
+
+This value -1 is in the cache
 """
-
-
-# In[ ]:
-
-
-
-
