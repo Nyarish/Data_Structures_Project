@@ -18,39 +18,35 @@ The `Huffman Coding` is a `lossless` data compression algorithm. A data compress
 
 The concept behind Huffman Coding is that there has to be fewer bits assigned for frequently occurring letters and more bits for less frequent ones. Here is the approach i took for this problem. 
 
-`huffnam_encoding`:
-
-First, for a given string I will find the frequency of each character and store it in a dictionary.
-I will then construct a heap using Python's heapq module.
-We build a Huffman Tree using the constructed heap where we will join two lowest value nodes until we have a root node.
-We then add 0 all left branches and 1 to all right branches.
-We encode the given text based on these values and send encoded_text and heaptree to huffman_decode function.
+To encode the data first I counted the frequency of each charachter, then built heapafied tree where the leaf nodes were the charachters the depth of each charachter in the tree is determined by their frequency in the data.
 
 
 
 ##### Time Complexity
 
-`Encoding`: `O(n^2)` for:
+The time complexity for the Solution to the problem is `O(nlogn) `. The reason being; 
 
-Finding the frequency of each charachter is `O(n)` (loop once through the input)
-from building the tree and since i'm storing the nodes in a dictionary, then it takes in the worst case 2 loops through the dictionary to find the 2 nodes with the lowest weight, in the dectionary to replace 2 nodes with 1 `O(n)`, and we need to repeat this until we have 1 node left `O(n-1)` this gives us `O(n^2-n`).
+The time complexity for `Encoding` using the function `huffman_encoding(data)` is `O(nlogn) `.
 
-`generating the code: O(nlogn)` where in the the number of unique charachters in the data (the number of leafes in the tree)
-replacing the charachters in the string (encode), takes `O(n^2)` because here we are replacing charachters in the string.
+1. Finding the frequency of each charachter is `O(n)` (loop once through the input).
+    
+2. Using a dictionary `node` which takes 2 `for loops` through the dictionary to find the 2 nodes with the lowest weight, in the dectionary to replace 2 nodes with 1 is `O(n)`. We need to repeat this process until we have 1 node left which is O(n-1) and thus overal end up with `=> O(n^2-n`).
+3. When generating the code using `encoding = generate_huffman_code(tree)` on line 70 of `Problem 3 Huffman Coding.py` the time complexity is `O(nlogn)` where the the number of unique charachters in the data (the number of leafes in the tree)
+4. When replacing the charachters in the string `encoded_data = encode(data, encoding)`, the time complexity is `O(n^2)` because here we are replacing charachters in the string.
 
-`Decoding: also O(n^2)`
+The time complexity for `Decoding` using the function `huffman_decoding(data, tree)`is also `O(nlogn)`.
 
-`generating the reverse code: O(nlogn)` where in the the number of unique charachters in the data (the number of leafes in the tree)
-`O(n^2) `where n is the length of the encoded data for building the string, loops over all charachters in the encoded data, and for each match with the reverse_code dictionary, it bulds a new string` O(n)`
+1. To generate the reverse code by calling `O(nlogn)` where in the the number of unique charachters in the data (the number of leafes in the tree). Also, the time complexity is `O(n^2) `where n is the length of the encoded data for building the string, loops over all charachters in the encoded data, and for each match with the reverse_code dictionary, it bulds a new string` O(n)`
 
+Thus the total `time complexity` to the problem is `O(nlogn) `
 
 #### Space Complexity
 
-`O(u*log(u))` from the tree for encoding
-`decoding O(n)` where n is the length of the string.
-
+Space complexity is `O(n)` as we need a constant space to store each node. Therefore for `n` nodes, space complexity grows linearly, where `n` is the length of the string `=> decoding O(n)` .
 
 
 ##### Acknowledgement
 
 I want to acknowledge the help i got for this entire project, from the mentors at Udacity, the knowledge forum and chats on the student portal. The materials i used are from the classroom secessions at udacity and from [Suhas Srivat](https://github.com/suhassrivats) , and [Nicolas Hanout](https://github.com/nicolashanout/Show-Me-the-Data-Structures---UDACITY--/blob/master/explanation_3.md)
+
+
